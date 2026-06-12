@@ -1,0 +1,38 @@
+from pydantic import BaseModel,EmailStr,AnyUrl,Field,model_validator
+from typing import List,Dict,Optional,Annotated
+class Patient(BaseModel):
+   
+    name: str
+    age: Annotated[int,Field(gt=0,lt=100)]
+    weight: Annotated[float,Field(gt=0,strict=True)]
+    #To Suppress the type coercision/data_conversion behaviour of pydantic,using strict parameter=True.
+    email: EmailStr
+    Linkedin: Optional[AnyUrl]
+    Married: Annotated[bool,Field(default=False)]
+    Allergies: Annotated[Optional[List[str]],Field(default=None,max_length=5)]
+    contact_details: Dict[str,AnyUrl]
+
+
+@model_validator(mode='after')
+def validate_emergency_contact(cls, model):
+        if model.age > 60 and 'emergency' not in model.contact_details:
+            raise ValueError('Patients older than 60 must have an emergency contact')
+        return model
+
+def display_patient_details(patient : Patient):
+
+   print(patient.name)
+   print(patient.age)
+   print(patient.weight)
+   print(patient.email)
+   print(patient.Linkedin)
+   print(patient.Married)
+   print(patient.Allergies)
+   print(patient.contact_details)
+   
+patient_info={'name': 'Amaan', 'age':20, 'weight': 65.0, 'email': 'amaansadat707@gmail.com', 'Linkedin': 'https://www.linkedin.com/in/amaansadat707/', 'Married': False, 'Allergies': ['Dust','Pollen'], 'contact_details': {'home': 'https://www.home.com', 'work': 'https://www.work.com'}}
+
+patient1 = Patient(**patient_info)
+
+display_patient_details(patient1)
+
